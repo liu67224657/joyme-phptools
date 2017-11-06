@@ -1,0 +1,88 @@
+<style>
+.dirimg {width:18px;height:auto;}
+.dirimg ul li {}
+</style>
+<div>
+    <h2>PHP补丁生成工具</h2>
+    <hr />
+    <form action="?c=patch&a=make" method="post">
+        <input type="hidden" name="id" value="<?php echo $patch_code;?>" />        
+        <h4 style="color:red;">制作补丁之前，一定要同步一次代码  -- <a href="?c=alpha">快捷入口</a></h4><br />
+        <h3>补丁编号:  <?php echo $patch_code;?> </h3><br />
+        <h3>项目:</h3><select name="project" id="project" onchange="selproject(this.value, event)" >
+            <option value="">请选择项目</option>
+            <?php
+            foreach($list as $k=>$v){
+            echo '<option value="'.$v.'">'.$v.'</option>';
+            }
+            ?>
+        </select><br />
+        <div class="dirbox" id='dirbox' ondblclick="getdir('', this, event)">请选择项目</div>
+        <br />
+        <input type="submit" value="生成补丁"/>
+    </form>
+</div>
+<script>
+    var project = '';
+    function getdir(name, obj, e) {
+        project = $('#project').val();
+        if (project == '') {
+            alert('请输入项目');
+            return false;
+        }
+
+        if ($(obj).attr('sta') == 1 && name != '') {
+            $(obj).find('ul').hide();
+            $(obj).attr('sta', 0);
+        } else if ($(obj).attr('sta') == 0 && name != '') {
+            $(obj).find('ul').show();
+            $(obj).attr('sta', 1);
+        } else {
+            if (name == '') {
+                $(obj).html('正在展开项目...');
+            }
+            $.ajax({
+                type: "GET",
+                url: "?c=patch&a=dirname",
+                data: "dir="+name+"&project=" + project,
+                dataType: 'json',
+                success: function(ret) {
+                    if (ret.rs == -1) {
+                        alert('请输入项目');
+                        return false;
+                    } else if (ret.rs == -2) {
+                        alert('项目不存在');
+                        return false;
+                    }
+                    var msg = eval(ret.msg);
+                    html = "<ul>";
+                    for (rs in dArr = msg['dirArr']) {
+                        html += "<li><div id='" + dArr[rs] + "' ondblclick='getdir(\"" + name + '/' + dArr[rs] + "\",this,event)'><img class='dirimg' src='static/image/dir.png'/>" + dArr[rs] + "</div></li>";
+                    }
+                    for (rs in fArr = msg['fileArr']) {
+                        html += "<li><input name='dir[]' type='checkbox' value='" + name + "/" + fArr[rs] + "' ondblclick='selfile(this,event)' />" + fArr[rs] + "</li>";
+                    }
+                    if (html == "<ul>") {
+                        html += "<li>空</li>";
+                    }
+                    html += "</ul>";
+                    if (name == '') {
+                        $(obj).html(html);
+                    } else {
+                        $(obj).append(html);
+                        $(obj).attr('sta', 1);
+                    }
+                }
+            });
+        }
+        e.stopPropagation();
+    }
+    function selproject(v, e) {
+        if (v != '') {
+            getdir('', $('#dirbox'), e)
+        }
+    }
+    function selfile(obj, event) {
+        event.stopPropagation();
+    }
+</script>

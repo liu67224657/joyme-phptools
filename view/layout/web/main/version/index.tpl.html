@@ -1,0 +1,74 @@
+<div class="hero-unit">
+	<h2>版本制作</h2>
+	<hr/>
+	<?php if(!empty($error)){ 
+		echo $error.'<br />';
+	}?>
+	<?php if(!empty($result)){ 
+		echo $result.'<br /><a href="?c=version&a=index">重新制作</a>';
+	}else{ ?>
+    <form action="?c=version&a=index" method="post" id="createform" name="createform">
+	项目:
+	<select name="project" id="project" >
+		<option value="">请选择项目</option>
+		<?php
+			foreach($list as $k=>$v){
+				echo '<option value="'.$v.'">'.$v.'</option>';
+			}
+		?>
+	</select><br /><br />
+	
+	版本变更:
+		<input type="radio" name="isnew" value="1"> 新版本
+		<input type="radio" name="isnew" value="0" checked> 老版本&nbsp;&nbsp;&nbsp;<br>
+		
+		<button id="getID">获取版本号</button><br/>
+		
+		<span>[注意:选择新版本则版本号变更加1，选择老版本则为当前版本发布次数加1]</span><br><br>
+		
+	<div>
+		版本号:<input type="text" id="version" name="version" value=""  readOnly='readOnly' />
+		<br>例如 xx_5.5.1.1  按照此版本号发布<br><br>
+	</div>
+	
+	
+	<input type="button" id="createbranch" value="版本制作" disabled='disabled'/>
+	</form>
+	
+	<?php } ?>
+</div>
+<script>
+$(function(){
+	$('#getID').click(function(){
+		var project = $('#project').val();
+		if(!project){
+			alert('请选择项目');
+			return false;
+		}
+		var isnew = $(":radio[name='isnew']:checked").val();
+		$.post('?c=version&a=getNewVersion',
+			{'project':project, 'isnew':isnew},
+			function(data){
+				data = jQuery.parseJSON(data);
+				if(data.rs == 1){
+					$('#version').parent().show();
+					$('#version').val(data.msg);
+					$('#version').attr('readOnly','readOnly');
+					$('#createbranch').removeAttr('disabled');
+				}else{
+					alert(data.msg);
+				}
+			});
+		return false;
+	});
+	$('#createbranch').click(function(){
+		var version = $('#version').val();
+		if(version == ''){
+			alert('请先获取项目版本号');
+			return false;
+		}
+		$('#createbranch').attr('disabled', 'disabled');
+		document.createform.submit();
+	});
+});
+</script>

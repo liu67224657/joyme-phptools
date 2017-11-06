@@ -1,0 +1,105 @@
+<div class="hero-unit">
+	<h2>版本发布</h2>
+	<hr/>
+    <?php if(!empty($result)){ ?>
+    	
+    	<h3>发布结果:</h3>
+    	<div id="result" style="height:300px;width:500px;border:2px solid green;overflow-y:scroll;">
+    		
+    	</div>
+    	<div><a href="?c=release&a=project">重新发布</a><br/></div>
+    <?php }else{ ?>
+    <form action="?c=release&a=project" method="post" id="createform" name="createform">
+		项目:
+        <select name="project" id="project" onchange="getversion(this.value)" >
+            <option value="">请选择项目</option>
+            <?php
+            foreach($list as $k=>$v){
+            	echo '<option value="'.$v.'">'.$v.'</option>';
+            }
+            ?>
+        </select>
+        <br /><br />
+		 版本:
+        <select name="version" id="version">
+        </select>	
+        <br /><br />
+       	 发布环境: 
+         <?php
+		if($com == 'alpha'){
+			echo $com;
+		}else{?>
+		<select name="path" id="path">
+            <option value="">请选择环境</option>
+            <option value="beta">beta</option>
+            <?php if($com == 'com'){ ?>
+            <option value="prod">prod</option>
+            <?php }?>
+        </select>	
+		<?php } ?>
+        <br /><br />
+        <input type="button" id="release" value="发布版本" disabled='disabled'/>
+    </form>
+
+    <?php } ?>
+</div>
+<script>
+    var project = '';
+    function getversion(project) {
+        if (project == '') {
+            alert('请输入项目');
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "?c=version&a=getVersion",
+            data: "project=" + project,
+            dataType: 'json',
+            success: function(data) {
+                res = eval(data);
+                if (res.rs != 1) {
+                    $('#release').attr('disabled', 'disabled');
+                    alert(res.msg);
+                } else {
+                	var optionhtml = '';
+                	for(var i in res.msg.version){
+                		optionhtml+="<option value='"+project+'_'+res.msg.version[i].version+"'>"+project+'_'+res.msg.version[i].version+''+"</option>";
+                	}
+                	$('#version').html(optionhtml);
+                    $('#release').removeAttr('disabled');
+                }
+            }
+        });
+    }
+    var timer;
+    var timestamp;
+    function getstatus() {
+    	
+    	timestamp=new Date().getTime();
+    	
+    	$('#result').html('');
+    	
+        $.ajax({
+            type: "GET",
+            url: "?c=release&a=getstatus&t="+timestamp,
+            dataType: 'json',
+            success: function(data) {
+                res = eval(data);
+                $(res.data).each(function(i,v){
+                	$('#result').prepend(v+'<br/>');
+                });
+                if(res.code == '1'){
+                	window.clearInterval(timer);
+                }
+            }
+        });
+    }
+    if ( $("#result").length > 0 ) {
+    	timer=window.setInterval("getstatus()",3000);
+    } 
+    $('#release').click(function(){
+    	$('#release').attr('disabled', 'disabled');
+    	document.createform.submit();
+    });
+</script>

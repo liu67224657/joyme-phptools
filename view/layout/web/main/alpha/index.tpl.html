@@ -1,0 +1,44 @@
+<div>
+    <h2>alpha svn同步工具</h2>
+            项目:<select name="project" id="project" >
+        <option value="">请选择项目</option>
+        <?php
+        foreach($list as $k=>$v){
+        	echo '<option value="'.$v.'">'.$v.'</option>';
+        }
+        ?>
+    </select>
+    <br /><br />
+          环境：<select name="path" id="path" >
+        <option value="alpha">alpha</option>
+        <option value="dev">dev</option>
+    </select>
+    <br /><br />
+    <input type="button" id="sub" onclick="getdir()" value="开始同步"/>
+    <br /><br />
+    <div id="rs">请先选择项目</div>
+</div>
+<script>
+    var project = '';
+    function getdir() {
+        project = $('#project').val();
+        path = $('#path').val();
+        timestamp=new Date().getTime();
+        if (project == '') {
+            alert('请选择要同步的项目');
+            return false;
+        }
+        $('#rs').html('svn同步中...');
+        $('#sub').attr('disabled', 'true');
+        $.ajax({
+            type: "POST",
+            url: "?c=alpha&a=ajaxUpdate",
+            data: "project=" + project+"&path=" + path+"&t="+timestamp,
+            dataType: 'json',
+            success: function(ret) {
+                $('#sub').removeAttr('disabled');
+                $('#rs').html('同步结果:'+ret.msg);
+            }
+        });
+    }
+</script>

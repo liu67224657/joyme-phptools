@@ -1,0 +1,33 @@
+<div class="hero-unit">
+<?php  global $pathkey;  if($pathkey=='alpha'){ ?>
+
+    <h2>alpha代码同步</h2>
+    <ul>
+        <li><a href="?c=alpha">alpha代码同步</a></li>
+    </ul>
+<?php }else{ ?>
+
+    <h2>制作  </h2>
+    <ul>
+        <li><a href="?c=version">制作版本</a></li>
+    </ul>
+    
+    <h2>刷新  </h2>
+    <ul>
+        <li><a href="?c=release&a=refreshcdn">刷新CDN</a></li>
+    </ul>
+
+	
+    <h2>发布  </h2>
+    <ul>
+        <li><a href="?c=release&a=project">版本发布</a></li>
+    </ul>
+    <ul>
+        <li><a href="?c=release&a=patch">补丁发布</a></li>
+    </ul>
+     <h2>回滚  </h2>
+    <ul>
+        <li><a href="?c=release&a=back">版本回滚</a></li>
+    </ul>
+<?php } ?>
+</div>

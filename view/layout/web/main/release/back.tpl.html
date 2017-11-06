@@ -1,0 +1,71 @@
+<div class="hero-unit">
+	<h2>版本回滚</h2>
+	<hr/>
+    <?php 
+	if(!empty($result)){ 
+    	echo $result.'<br /><a href="?c=release&a=back">重新回滚</a>';
+    }else{ ?>
+    <form action="?c=release&a=back" method="post">
+		项目:
+        <select name="project" id="project" onchange="getversion(this.value)" >
+            <option value="">请选择项目</option>
+            <?php
+            foreach($list as $k=>$v){
+            	echo '<option value="'.$v.'">'.$v.'</option>';
+            }
+            ?>
+        </select>
+        <br /><br />
+		 版本:
+        <select name="version" id="version">
+        </select>	
+        <br /><br />
+       	 发布环境: 
+         <?php
+		if($com == 'alpha'){
+			echo $com;
+		}else{?>
+		<select name="path" id="path">
+            <option value="">请选择环境</option>
+            <option value="beta">beta</option>
+            <?php if($com == 'com'){ ?>
+            <option value="prod">prod</option>
+            <?php }?>
+        </select>	
+		<?php } ?>
+        <br /><br />
+        <input type="submit" id="release" value="开始回滚" disabled='disabled'/>
+    </form>
+
+    <?php } ?>
+</div>
+<script>
+    var project = '';
+    function getversion(project) {
+        if (project == '') {
+            alert('请输入项目');
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "?c=version&a=getVersion",
+            data: "project=" + project,
+            dataType: 'json',
+            success: function(data) {
+                res = eval(data);
+                if (res.rs != 1) {
+                    $('#release').attr('disabled', 'disabled');
+                    alert(res.msg);
+                } else {
+                	var optionhtml = '';
+                	for(var i in res.msg.version){
+                		optionhtml+="<option value='"+project+'_'+res.msg.version[i].version+"'>"+project+'_'+res.msg.version[i].version+''+"</option>";
+                	}
+                	$('#version').html(optionhtml);
+                    $('#release').removeAttr('disabled');
+                }
+            }
+        });
+    }
+</script>

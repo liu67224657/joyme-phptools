@@ -1,0 +1,76 @@
+<div class="hero-unit">
+	<h2>补丁发布</h2>
+	<hr/>
+	<?php if(!empty($result)){ ?>
+    	
+    	<h3>发布结果:</h3>
+    	<div id="result" style="height:300px;width:500px;border:2px solid green;overflow-y:scroll;">
+    		
+    	</div>
+    	<div><a href="?c=release&a=patch">重新发布</a><br/></div>
+    <?php }else{ ?>
+    <form action="?c=release&a=patch" method="post" id="patchform" name="patchform">
+	项目:
+	<select name="project" id="project" >
+		<option value="">请选择项目</option>
+		<?php
+			foreach($list as $k=>$v){
+				echo '<option value="'.$v.'">'.$v.'</option>';
+			}
+		?>
+	</select><br /><br />
+	补丁编号:<input type="text" name="id" value="" />
+	<br /><br />
+	发布环境: 
+	<?php
+	if($com == 'alpha'){
+		echo $com;
+	}else{?>
+	<select name="path" id="path">
+        <option value="">请选择环境</option>
+        <option value="beta">beta</option>
+        <?php if($com == 'com'){ ?>
+        <option value="prod">prod</option>
+        <?php }?>
+    </select>	
+	<?php } ?>
+	<br /><br />
+	<input type="submit" id="patchsub" value="发布补丁"/>
+	</form>
+	
+	<?php } ?>
+</div>
+<script>
+var timer;
+
+var timestamp;
+
+function getstatus() {
+	
+	timestamp=new Date().getTime();
+	
+	$('#result').html('');
+	
+    $.ajax({
+        type: "GET",
+        url: "?c=release&a=getstatus&t="+timestamp,
+        dataType: 'json',
+        success: function(data) {
+            res = eval(data);
+            $(res.data).each(function(i,v){
+            	$('#result').prepend(v+'<br/>');
+            });
+            if(res.code == '1'){
+            	window.clearInterval(timer);
+            }
+        }
+    });
+}
+if ( $("#result").length > 0 ) {
+	timer=window.setInterval("getstatus()",3000);
+} 
+$('#patchsub').click(function(){
+	$('#patchsub').attr('disabled', 'disabled');
+	document.patchform.submit();
+});
+</script>
